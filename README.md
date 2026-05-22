@@ -1,13 +1,13 @@
 # llama.cpp local server
 
-Local inference server using [llama.cpp](https://github.com/ggerganov/llama.cpp).
+Local inference server using [llama.cpp](https://github.com/ggerganov/llama.cpp) with Qwen3.5-4B on RTX 4070 8GB.
 
 ## Requirements
 
 - Windows 10/11 x64
-- NVIDIA GPU with CUDA 12.4
+- NVIDIA GPU with CUDA 12.4 drivers
 - PowerShell 5+
-- Model: `%USERPROFILE%\models\Qwen3.5-4B-Q4_K_M.gguf`
+- ~3 GB disk space for model
 
 ## Setup
 
@@ -15,7 +15,11 @@ Local inference server using [llama.cpp](https://github.com/ggerganov/llama.cpp)
 .\setup.ps1
 ```
 
-Downloads and extracts release `b9284` (CUDA 12.4) from the official repository.
+Downloads and extracts:
+- llama.cpp release `b9284` (CUDA 12.4) from GitHub
+- Model `Qwen3.5-4B-Q4_K_M.gguf` (~2.6 GB) from [unsloth/Qwen3.5-4B-GGUF](https://huggingface.co/unsloth/Qwen3.5-4B-GGUF) into `%USERPROFILE%\models\`
+
+If model already exists, download is skipped.
 
 ## Usage
 
@@ -23,16 +27,28 @@ Downloads and extracts release `b9284` (CUDA 12.4) from the official repository.
 .\start-server.ps1
 ```
 
-Server starts at `http://localhost:8080`.
+Server starts at `http://localhost:8080` with an OpenAI-compatible API.
 
-| Parameter | Value |
-|-----------|-------|
-| Model | Qwen3.5-4B Q4_K_M |
-| Context | 131K tokens |
-| GPU layers | 99 (all on GPU) |
-| KV cache | q8_0 |
-| MTP | draft-mtp, 3 tokens |
-| Flash attention | on |
+| Parameter | Value | Notes |
+|-----------|-------|-------|
+| Model | Qwen3.5-4B Q4_K_M | 4-bit quantized, ~2.6 GB |
+| Context | 131K tokens | Full context window |
+| GPU layers | 99 | Entire model on GPU |
+| KV cache | q8_0 | 8-bit KV — saves VRAM, minimal quality loss |
+| MTP | draft-mtp, 3 tokens | Multi-token prediction speculative decoding |
+| Flash attention | on | Faster attention, lower VRAM |
+| Parallel | 1 | Single concurrent request |
+
+### API usage example
+
+```bash
+curl http://localhost:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen3.5-4b",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
 
 ## OpenCode Integration
 
@@ -83,3 +99,14 @@ Optional — dedicated agent that only uses local tools (no internet):
 ```
 
 Model appears in the selector as **LLaMA Local → Qwen3.5-4B (local)**. Requires server running (`.\start-server.ps1`).
+
+## Troubleshooting
+
+**CUDA not found / runs on CPU**
+Verify CUDA 12.4 drivers are installed: `nvidia-smi` should show driver version ≥ 550.
+
+**Out of memory (OOM)**
+Reduce context: change `-c 131072` to `-c 65536` in `start-server.ps1`.
+
+**Port already in use**
+Change `--port 8080` to another port in `start-server.ps1` and update `baseURL` in OpenCode config.
