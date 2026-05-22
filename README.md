@@ -1,13 +1,13 @@
 # llama.cpp local server
 
-Servidor local de inferência com [llama.cpp](https://github.com/ggerganov/llama.cpp).
+Local inference server using [llama.cpp](https://github.com/ggerganov/llama.cpp).
 
-## Requisitos
+## Requirements
 
 - Windows 10/11 x64
-- GPU NVIDIA com CUDA 12.4
+- NVIDIA GPU with CUDA 12.4
 - PowerShell 5+
-- Modelo: `%USERPROFILE%\models\Qwen3.5-4B-Q4_K_M.gguf`
+- Model: `%USERPROFILE%\models\Qwen3.5-4B-Q4_K_M.gguf`
 
 ## Setup
 
@@ -15,28 +15,28 @@ Servidor local de inferência com [llama.cpp](https://github.com/ggerganov/llama
 .\setup.ps1
 ```
 
-Baixa e extrai o release `b9284` (CUDA 12.4) do repositório oficial.
+Downloads and extracts release `b9284` (CUDA 12.4) from the official repository.
 
-## Uso
+## Usage
 
 ```powershell
 .\start-server.ps1
 ```
 
-Servidor sobe em `http://localhost:8080`.
+Server starts at `http://localhost:8080`.
 
-| Parâmetro | Valor |
+| Parameter | Value |
 |-----------|-------|
-| Modelo | Qwen3.5-4B Q4_K_M |
+| Model | Qwen3.5-4B Q4_K_M |
 | Context | 131K tokens |
-| GPU layers | 99 (tudo na GPU) |
+| GPU layers | 99 (all on GPU) |
 | KV cache | q8_0 |
 | MTP | draft-mtp, 3 tokens |
 | Flash attention | on |
 
-## Integração com OpenCode
+## OpenCode Integration
 
-Adicione o provider `llama-local` no `opencode.json` (`~/.config/opencode/opencode.json`):
+Add the `llama-local` provider to `opencode.json` (`~/.config/opencode/opencode.json`):
 
 ```json
 {
@@ -62,13 +62,13 @@ Adicione o provider `llama-local` no `opencode.json` (`~/.config/opencode/openco
 }
 ```
 
-Opcional — agent dedicado que só usa ferramentas locais (sem internet):
+Optional — dedicated agent that only uses local tools (no internet):
 
 ```json
 {
   "agent": {
     "llama": {
-      "description": "Local file agent — busca e edita arquivos sem internet",
+      "description": "Local file agent — reads and edits files without internet",
       "model": "llama-local/qwen3.5-4b",
       "mode": "all",
       "prompt": "/no_think You are a local file editing agent. You ONLY use read, write, edit, and glob tools. Never use web search, fetch, or any external tools.",
@@ -82,4 +82,4 @@ Opcional — agent dedicado que só usa ferramentas locais (sem internet):
 }
 ```
 
-Modelo aparece no seletor como **LLaMA Local → Qwen3.5-4B (local)**. Requer servidor rodando (`.\start-server.ps1`).
+Model appears in the selector as **LLaMA Local → Qwen3.5-4B (local)**. Requires server running (`.\start-server.ps1`).
