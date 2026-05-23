@@ -23,7 +23,6 @@ $commonArgs = @(
     "--parallel", "1",
     "--no-mmap",
     "--jinja",
-    "--reasoning", "off",
     "--host", $HostAddress,
     "--port", "$Port"
 )
@@ -35,7 +34,7 @@ if ($Device -eq "rtx") {
     }
 
     Write-Host "Starting Qwen3.5-4B on RTX/CUDA at http://localhost:$Port ..."
-    Write-Host "Context: $RtxContext | GPU layers: 99 | MTP: on | KV: q8_0 | Reasoning: off"
+    Write-Host "Context: $RtxContext | GPU layers: 99 | MTP: on | KV: q8_0 | Reasoning: per-request (/think or /no_think)"
     Write-Host "Press Ctrl+C to stop."
 
     Push-Location (Split-Path $CudaServerPath)
@@ -69,7 +68,7 @@ if ($VulkanDevice -ne "") {
 }
 
 Write-Host "Starting Qwen3.5-4B on iGPU/Vulkan at http://localhost:$Port ..."
-Write-Host "Context: $IgpuContext | GPU layers: 99 | Vulkan device: $VulkanDevice | MTP: off | KV: f16 | Reasoning: off"
+Write-Host "Context: $IgpuContext | GPU layers: 99 | Vulkan device: $VulkanDevice | MTP: off | KV: f16 | Reasoning: per-request (/think or /no_think)"
 Write-Host "Press Ctrl+C to stop."
 
 Push-Location (Split-Path $VulkanServerPath)
