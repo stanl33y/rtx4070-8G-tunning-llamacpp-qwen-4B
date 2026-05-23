@@ -44,9 +44,11 @@ Write-Host ""
 
 Push-Location (Split-Path $benchPath)
 try {
-    $result = & $benchPath "-m", $q4Model + $commonArgs
+    $q4Args = @("-m", $q4Model) + $commonArgs
+    $q8Args = @("-m", $q8Model) + $commonArgs
+    $result  = & $benchPath @q4Args
     $result += ""
-    $result += & $benchPath "-m", $q8Model + $commonArgs
+    $result += & $benchPath @q8Args
 } finally {
     Pop-Location
 }
