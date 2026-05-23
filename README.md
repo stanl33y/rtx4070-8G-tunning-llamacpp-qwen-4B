@@ -131,7 +131,7 @@ Downloads two things:
 ### 2. Model
 - File: `Qwen3.5-4B-Q4_K_M.gguf`
 - Size: ~2.6 GB
-- Source: [unsloth/Qwen3.5-4B-GGUF](https://huggingface.co/unsloth/Qwen3.5-4B-GGUF)
+- Source: [unsloth/Qwen3.5-4B-MTP-GGUF](https://huggingface.co/unsloth/Qwen3.5-4B-MTP-GGUF) — MTP variant with speculative decoding heads
 - Saved to: `%USERPROFILE%\models\Qwen3.5-4B-Q4_K_M.gguf`
 - Skipped if file already exists
 

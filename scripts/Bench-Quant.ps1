@@ -10,7 +10,7 @@ param(
 $modelDir  = "$env:USERPROFILE\models"
 $q4Model   = "$modelDir\Qwen3.5-4B-Q4_K_M.gguf"
 $q8Model   = "$modelDir\Qwen3.5-4B-Q8_0.gguf"
-$q8Url     = "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q8_0.gguf"
+$q8Url     = "https://huggingface.co/unsloth/Qwen3.5-4B-MTP-GGUF/resolve/main/Qwen3.5-4B-Q8_0.gguf"
 $benchPath = Join-Path (Split-Path $CudaServerPath) "llama-bench.exe"
 
 if (-not (Test-Path $benchPath)) {

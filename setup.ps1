@@ -7,7 +7,7 @@ $destination = "$PSScriptRoot\bin\cuda"
 
 $modelDir = "$env:USERPROFILE\models"
 $modelFile = "$modelDir\Qwen3.5-4B-Q4_K_M.gguf"
-$modelUrl = "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf"
+$modelUrl = "https://huggingface.co/unsloth/Qwen3.5-4B-MTP-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf"
 
 $ProgressPreference = "SilentlyContinue"
 
