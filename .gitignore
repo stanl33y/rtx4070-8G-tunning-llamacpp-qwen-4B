@@ -1,3 +1,7 @@
 *.dll
 *.exe
 *.zip
+bin/
+logs/
+run/
+benchmark-results/

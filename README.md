@@ -1,6 +1,6 @@
-# llama.cpp local server — RTX 4070 8GB + Qwen3.5-4B
+# llama.cpp local server — RTX/iGPU + Qwen3.5-4B
 
-Local inference server using [llama.cpp](https://github.com/ggerganov/llama.cpp) tuned for RTX 4070 8GB with Qwen3.5-4B.
+Local inference server using [llama.cpp](https://github.com/ggerganov/llama.cpp) tuned for RTX 4070 8GB with Qwen3.5-4B, with an optional iGPU/Vulkan launcher.
 
 Exposes an OpenAI-compatible API at `http://localhost:8080/v1` — drop-in replacement for any tool that accepts a custom `baseURL`.
 
@@ -29,11 +29,91 @@ cd rtx4070-8G-tunning-llamacpp-qwen-4B
 # 2. Download binaries + model (~2.6 GB, one-time)
 .\setup.ps1
 
-# 3. Start the server
+# 3. Start the server on RTX/CUDA
 .\start-server.ps1
 ```
 
 Server ready at `http://localhost:8080`.
+
+`start-server.ps1` remains the RTX/CUDA default. The explicit equivalent is:
+
+```powershell
+.\start-server-rtx.ps1
+```
+
+### Optional: iGPU/Vulkan
+
+The current CUDA build cannot run on the iGPU. Install the Vulkan build separately:
+
+```powershell
+.\setup-igpu-vulkan.ps1
+.\start-server-igpu.ps1
+```
+
+The iGPU profile uses a smaller context by default (`32768`) because integrated GPUs usually share system RAM and are much slower than the RTX profile.
+
+To see available devices:
+
+```powershell
+.\scripts\List-LlamaDevices.ps1
+```
+
+If Vulkan lists more than one GPU and you need to force a device index:
+
+```powershell
+.\start-server-igpu.ps1 -VulkanDevice 0
+```
+
+### Run both servers
+
+Start RTX/CUDA and iGPU/Vulkan at the same time on different ports:
+
+```powershell
+.\start-servers.ps1
+```
+
+Defaults:
+- RTX/CUDA: `http://localhost:8080/v1`
+- iGPU/Vulkan: `http://localhost:8081/v1`
+
+Use custom ports:
+
+```powershell
+.\start-servers.ps1 -RtxPort 18080 -IgpuPort 18081
+```
+
+Stop both:
+
+```powershell
+.\stop-servers.ps1
+```
+
+Server logs are written under `logs\`, and runtime PID files under `run\`.
+
+### Benchmark tokens/s
+
+Run the same short llama.cpp benchmark against each backend:
+
+```powershell
+.\bench-rtx.ps1
+.\bench-igpu.ps1
+```
+
+Run both benchmarks at the same time:
+
+```powershell
+.\bench-both.ps1
+```
+
+For a quick smoke test:
+
+```powershell
+.\bench-rtx.ps1 -PromptTokens 128 -GenTokens 32 -Repetitions 1
+.\bench-igpu.ps1 -PromptTokens 128 -GenTokens 32 -Repetitions 1
+.\bench-both.ps1 -PromptTokens 128 -GenTokens 32 -Repetitions 1
+```
+
+Parallel benchmark output is saved under `benchmark-results\`.
 
 ---
 
@@ -45,7 +125,8 @@ Downloads two things:
 - Release: `b9284`
 - Build: `win-cuda-12.4-x64`
 - Source: [github.com/ggerganov/llama.cpp/releases](https://github.com/ggerganov/llama.cpp/releases)
-- Extracted directly into the current directory
+- Extracted into `bin\cuda`
+- CUDA runtime DLLs are downloaded into `bin\cuda`
 
 ### 2. Model
 - File: `Qwen3.5-4B-Q4_K_M.gguf`
@@ -108,6 +189,8 @@ To use a different quantization, update the model filename in `setup.ps1` and `s
 
 ## start-server.ps1 — Parameter Reference
 
+`start-server.ps1` is a compatibility wrapper for the RTX/CUDA profile. The shared launcher lives at `scripts/Start-LlamaServer.ps1`.
+
 | Flag | Value | Why |
 |------|-------|-----|
 | `-m` | `%USERPROFILE%\models\Qwen3.5-4B-Q4_K_M.gguf` | Model path |
@@ -124,6 +207,31 @@ To use a different quantization, update the model filename in `setup.ps1` and `s
 | `-ctv q8_0` | KV cache values in q8_0 | Same as above for values |
 | `--host 0.0.0.0` | Listen on all interfaces | Accessible from local network; change to `127.0.0.1` for localhost-only |
 | `--port 8080` | Port 8080 | Standard local inference port |
+
+### Launcher layout
+
+| File | Purpose |
+|------|---------|
+| `start-server.ps1` | Backward-compatible RTX/CUDA startup |
+| `start-server-rtx.ps1` | Explicit RTX/CUDA startup |
+| `start-server-igpu.ps1` | iGPU/Vulkan startup |
+| `start-servers.ps1` | Starts RTX/CUDA and iGPU/Vulkan together |
+| `stop-servers.ps1` | Stops both managed servers |
+| `bench-rtx.ps1` | Benchmarks RTX/CUDA tokens/s |
+| `bench-igpu.ps1` | Benchmarks iGPU/Vulkan tokens/s |
+| `bench-both.ps1` | Benchmarks both backends in parallel |
+| `setup.ps1` | Downloads the CUDA build into `bin\cuda` |
+| `setup-igpu-vulkan.ps1` | Downloads the Vulkan build into `bin\igpu` |
+| `scripts\Start-LlamaServer.ps1` | Shared launcher with `-Device rtx` or `-Device igpu` |
+| `scripts\List-LlamaDevices.ps1` | Prints detected llama.cpp devices |
+| `config\server.ps1` | Shared model path, port, backend paths, and context sizes |
+
+The root directory keeps only scripts and documentation. Backend files stay isolated:
+
+| Directory | Backend |
+|-----------|---------|
+| `bin\cuda` | RTX/CUDA build and CUDA runtime DLLs |
+| `bin\igpu` | iGPU/Vulkan build |
 
 ### Why MTP (Multi-Token Prediction)?
 
