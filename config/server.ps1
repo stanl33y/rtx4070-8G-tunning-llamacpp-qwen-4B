@@ -6,5 +6,5 @@ $CudaServerPath = Join-Path $PSScriptRoot "..\bin\cuda\llama-server.exe"
 $VulkanServerPath = Join-Path $PSScriptRoot "..\bin\igpu\llama-server.exe"
 
 $RtxContext = 131072
-$IgpuContext = 32768
+$IgpuContext = 65536
 $DefaultIgpuVulkanDevice = "0"
